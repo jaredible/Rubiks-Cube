@@ -20,17 +20,11 @@ public class Main extends Canvas implements KeyListener {
 	private static final int N = 3;
 
 	// face id's
-	/** facelet value = 10 **/
 	private static final int U = 0;
-	/** facelet value = 20 **/
 	private static final int D = 1;
-	/** facelet value = 30 **/
 	private static final int F = 2;
-	/** facelet value = 40 **/
 	private static final int B = 3;
-	/** facelet value = 50 **/
 	private static final int L = 4;
-	/** facelet value = 60 **/
 	private static final int R = 5;
 
 	// cube facelets
@@ -45,6 +39,15 @@ public class Main extends Canvas implements KeyListener {
 			{ U, B, D, F }, // L: U B D F
 			{ F, D, B, U }, // R: F D B U
 	};
+
+	// TODO: add cube rotations
+	// TODO: add optional mouse selecting
+	// TODO: add algorithm execution
+	// TODO: 2.5D?
+	// TODO: 3D!?
+	// TODO: add solving capability and output solution
+	// TODO: scalable?
+	// TODO: efficiency??
 
 	public Main() {
 		addKeyListener(this);
@@ -71,35 +74,13 @@ public class Main extends Canvas implements KeyListener {
 		return target;
 	}
 
-	// TODO: add cube rotations
-	// TODO: add optional mouse selecting
-	// TODO: add algorithm execution
-	// TODO: 2.5D?
-	// TODO: 3D!?
-	// TODO: add solving capability and output solution
-
 	private void a(int[][] src, int face, int direction) {
-		int i;
-		int[] c = { 0, 2, 8, 6 };
-		int[] e = { 1, 5, 7, 3 };
+		int i, j;
+		int[][] a = { { 0, 2, 8, 6 }, { 1, 5, 7, 3 } };
 
-		if (direction == 1) {
-			// rotate corners
-			for (i = 0; i < c.length; i++)
-				cube[face][c[i]] = src[face][c[(i + c.length - 1) % c.length]];
-
-			// rotate edges
-			for (i = 0; i < e.length; i++)
-				cube[face][e[i]] = src[face][e[(i + e.length - 1) % e.length]];
-		} else if (direction == -1) {
-			// rotate corners
-			for (i = 0; i < c.length; i++)
-				cube[face][c[i]] = src[face][c[(i + 1) % c.length]];
-
-			// rotate edges
-			for (i = 0; i < e.length; i++)
-				cube[face][e[i]] = src[face][e[(i + 1) % e.length]];
-		}
+		for (j = 0; j < 2; j++)
+			for (i = 0; i < 4; i++)
+				cube[face][a[j][i]] = src[face][a[j][(2 + i + direction) % 4]];
 	}
 
 	/**
@@ -124,7 +105,6 @@ public class Main extends Canvas implements KeyListener {
 		switch (face) {
 		case U:
 			if (direction == 1) {
-				// rotate outer facelets
 				for (i = 0; i < N; i++) {
 					cube[F][i] = prev[R][i];
 					cube[R][i] = prev[B][i];
@@ -132,8 +112,7 @@ public class Main extends Canvas implements KeyListener {
 					cube[L][i] = prev[F][i];
 				}
 			} else if (direction == -1) {
-				// rotate outer facelets
-				for (i = 0; i < 3; i++) {
+				for (i = 0; i < N; i++) {
 					cube[F][i] = prev[L][i];
 					cube[R][i] = prev[F][i];
 					cube[B][i] = prev[R][i];
@@ -160,14 +139,14 @@ public class Main extends Canvas implements KeyListener {
 			break;
 		case F:
 			if (direction == 1) {
-				for (i = 0; i < 3; i++) {
+				for (i = 0; i < N; i++) {
 					cube[U][6 + i] = prev[L][2 + i * 3];
 					cube[R][i * 3] = prev[U][6 + i];
 					cube[D][i] = prev[R][i * 3];
 					cube[L][2 + i * 3] = prev[D][i];
 				}
 			} else if (direction == -1) {
-				for (i = 0; i < 3; i++) {
+				for (i = 0; i < N; i++) {
 					cube[U][6 + i] = prev[R][i * 3];
 					cube[R][i * 3] = prev[D][i];
 					cube[D][i] = prev[L][2 + i * 3];
@@ -177,14 +156,14 @@ public class Main extends Canvas implements KeyListener {
 			break;
 		case B:
 			if (direction == 1) {
-				for (i = 0; i < 3; i++) {
+				for (i = 0; i < N; i++) {
 					cube[U][i] = prev[R][2 + i * 3];
 					cube[L][i * 3] = prev[U][i];
 					cube[D][6 + i] = prev[L][i * 3];
 					cube[R][2 + i * 3] = prev[D][6 + i];
 				}
 			} else if (direction == -1) {
-				for (i = 0; i < 3; i++) {
+				for (i = 0; i < N; i++) {
 					cube[U][i] = prev[L][i * 3];
 					cube[L][i * 3] = prev[D][6 + i];
 					cube[D][6 + i] = prev[R][2 + i * 3];
@@ -194,14 +173,14 @@ public class Main extends Canvas implements KeyListener {
 			break;
 		case L:
 			if (direction == 1) {
-				for (i = 0; i < 3; i++) {
+				for (i = 0; i < N; i++) {
 					cube[U][i * 3] = prev[B][2 + i * 3];
 					cube[F][i * 3] = prev[U][i * 3];
 					cube[D][i * 3] = prev[F][i * 3];
 					cube[B][2 + i * 3] = prev[D][i * 3];
 				}
 			} else if (direction == -1) {
-				for (i = 0; i < 3; i++) {
+				for (i = 0; i < N; i++) {
 					cube[U][i * 3] = prev[F][i * 3];
 					cube[F][i * 3] = prev[D][i * 3];
 					cube[D][i * 3] = prev[B][2 + i * 3];
@@ -211,14 +190,14 @@ public class Main extends Canvas implements KeyListener {
 			break;
 		case R:
 			if (direction == 1) {
-				for (i = 0; i < 3; i++) {
+				for (i = 0; i < N; i++) {
 					cube[U][2 + i * 3] = prev[F][2 + i * 3];
 					cube[F][2 + i * 3] = prev[D][2 + i * 3];
 					cube[D][2 + i * 3] = prev[B][i * 3];
 					cube[B][i * 3] = prev[U][2 + i * 3];
 				}
 			} else if (direction == -1) {
-				for (i = 0; i < 3; i++) {
+				for (i = 0; i < N; i++) {
 					cube[U][2 + i * 3] = prev[B][i * 3];
 					cube[F][2 + i * 3] = prev[U][2 + i * 3];
 					cube[D][2 + i * 3] = prev[F][2 + i * 3];
@@ -390,8 +369,8 @@ public class Main extends Canvas implements KeyListener {
 		frame.setAlwaysOnTop(true);
 
 		main.resetCube();
-		// main.scrambleCube(0);
-		main.printCube();
+		main.scrambleCube(0);
+		// main.printCube();
 	}
 
 	private int selectedFace = U;
@@ -401,7 +380,7 @@ public class Main extends Canvas implements KeyListener {
 			selectedFace = e.getKeyCode() - 48 - 1;
 			System.out.println("Selected face: " + selectedFace);
 		} else if (Math.abs(e.getKeyCode() - 38) == 1) twist(selectedFace, e.getKeyCode() - 38);
-		printCube();
+		// printCube();
 		repaint();
 	}
 
