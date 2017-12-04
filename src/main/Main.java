@@ -40,6 +40,7 @@ public class Main extends Canvas implements KeyListener {
 			{ F, D, B, U }, // R: F D B U
 	};
 
+	// TODO: DOCUMENT EVERYTHING!!!!!
 	// TODO: add cube rotations
 	// TODO: add optional mouse selecting
 	// TODO: add algorithm execution
@@ -98,27 +99,15 @@ public class Main extends Canvas implements KeyListener {
 
 		int[][] prev = cloneArray(cube);
 
-		int i;
+		int i, j;
 
 		a(prev, face, direction);
 
 		switch (face) {
 		case U:
-			if (direction == 1) {
-				for (i = 0; i < N; i++) {
-					cube[F][i] = prev[R][i];
-					cube[R][i] = prev[B][i];
-					cube[B][i] = prev[L][i];
-					cube[L][i] = prev[F][i];
-				}
-			} else if (direction == -1) {
-				for (i = 0; i < N; i++) {
-					cube[F][i] = prev[L][i];
-					cube[R][i] = prev[F][i];
-					cube[B][i] = prev[R][i];
-					cube[L][i] = prev[B][i];
-				}
-			}
+			for (i = 0; i < N; i++)
+				for (j = 0; j < 4; j++)
+					cube[adjacentFaces[U][j]][i] = prev[adjacentFaces[U][(2 + j - direction) % 4]][i];
 			break;
 		case D:
 			if (direction == 1) {
@@ -369,7 +358,7 @@ public class Main extends Canvas implements KeyListener {
 		frame.setAlwaysOnTop(true);
 
 		main.resetCube();
-		main.scrambleCube(0);
+		// main.scrambleCube(0);
 		// main.printCube();
 	}
 
