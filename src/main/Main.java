@@ -33,11 +33,11 @@ public class Main extends Canvas implements KeyListener {
 	// faces adjacent to each face
 	private static final int[][] adjacentFaces = { //
 			{ F, R, B, L }, // U: F R B L
-			{ L, B, R, F }, // D: L B R F
-			{ L, D, R, U }, // F: L D R U
-			{ R, D, L, U }, // B: R D L U
-			{ U, B, D, F }, // L: U B D F
-			{ F, D, B, U }, // R: F D B U
+			{ F, R, B, L }, // D: F R B L
+			{ U, R, D, L }, // F: U R D L
+			{ U, L, D, R }, // B: U L D R
+			{ U, F, D, B }, // L: U F D B
+			{ U, F, D, B }, // R: U F D B
 	};
 
 	// TODO: DOCUMENT EVERYTHING!!!!!
@@ -48,7 +48,10 @@ public class Main extends Canvas implements KeyListener {
 	// TODO: 3D!?
 	// TODO: add solving capability and output solution
 	// TODO: scalable?
-	// TODO: efficiency??
+	// TODO: improve efficiency
+	// TODO: 300 lines of code or less challenge!
+	// TODO: 250 lines of code or less challenge!!
+	// TODO: 200 lines of code or less challenge!!!
 
 	public Main() {
 		addKeyListener(this);
@@ -77,7 +80,7 @@ public class Main extends Canvas implements KeyListener {
 
 	private void a(int[][] src, int face, int direction) {
 		int i, j;
-		int[][] a = { { 0, 2, 8, 6 }, { 1, 5, 7, 3 } };
+		int[][] a = { { 0, 2, 8, 6 }, { 1, 5, 7, 3 } }; // corners, edges
 
 		for (j = 0; j < 2; j++)
 			for (i = 0; i < 4; i++)
@@ -105,94 +108,40 @@ public class Main extends Canvas implements KeyListener {
 
 		switch (face) {
 		case U:
+			int[] a = { 0, 0, 0, 0 };
 			for (i = 0; i < N; i++)
 				for (j = 0; j < 4; j++)
-					cube[adjacentFaces[U][j]][i] = prev[adjacentFaces[U][(2 + j - direction) % 4]][i];
+					cube[adjacentFaces[face][j]][a[j] + i * 1] = prev[adjacentFaces[face][(2 + j - direction) % 4]][a[j] + i * 1];
 			break;
 		case D:
-			if (direction == 1) {
-				for (i = 6; i < 9; i++) {
-					cube[F][i] = prev[L][i];
-					cube[R][i] = prev[F][i];
-					cube[B][i] = prev[R][i];
-					cube[L][i] = prev[B][i];
-				}
-			} else if (direction == -1) {
-				for (i = 6; i < 9; i++) {
-					cube[F][i] = prev[R][i];
-					cube[R][i] = prev[B][i];
-					cube[B][i] = prev[L][i];
-					cube[L][i] = prev[F][i];
-				}
-			}
+			int[] b = { 6, 6, 6, 6 };
+			for (i = 0; i < N; i++)
+				for (j = 0; j < 4; j++)
+					cube[adjacentFaces[face][j]][b[j] + i * 1] = prev[adjacentFaces[face][(2 + j + direction) % 4]][b[j] + i * 1];
 			break;
 		case F:
-			if (direction == 1) {
-				for (i = 0; i < N; i++) {
-					cube[U][6 + i] = prev[L][2 + i * 3];
-					cube[R][i * 3] = prev[U][6 + i];
-					cube[D][i] = prev[R][i * 3];
-					cube[L][2 + i * 3] = prev[D][i];
-				}
-			} else if (direction == -1) {
-				for (i = 0; i < N; i++) {
-					cube[U][6 + i] = prev[R][i * 3];
-					cube[R][i * 3] = prev[D][i];
-					cube[D][i] = prev[L][2 + i * 3];
-					cube[L][2 + i * 3] = prev[U][6 + i];
-				}
-			}
+			int[] c = { 6, 0, 0, 2 };
+			for (i = 0; i < N; i++)
+				for (j = 0; j < 4; j++)
+					cube[adjacentFaces[face][j]][c[j] + i * (1 + (j % 2) * 2)] = prev[adjacentFaces[face][(2 + j + direction) % 4]][c[(2 + j + direction) % 4] + i * (3 - (j % 2) * 2)];
 			break;
 		case B:
-			if (direction == 1) {
-				for (i = 0; i < N; i++) {
-					cube[U][i] = prev[R][2 + i * 3];
-					cube[L][i * 3] = prev[U][i];
-					cube[D][6 + i] = prev[L][i * 3];
-					cube[R][2 + i * 3] = prev[D][6 + i];
-				}
-			} else if (direction == -1) {
-				for (i = 0; i < N; i++) {
-					cube[U][i] = prev[L][i * 3];
-					cube[L][i * 3] = prev[D][6 + i];
-					cube[D][6 + i] = prev[R][2 + i * 3];
-					cube[R][2 + i * 3] = prev[U][i];
-				}
-			}
+			int[] d = { 0, 0, 6, 2 };
+			for (i = 0; i < N; i++)
+				for (j = 0; j < 4; j++)
+					cube[adjacentFaces[face][j]][d[j] + i * (1 + (j % 2) * 2)] = prev[adjacentFaces[face][(2 + j + direction) % 4]][d[(2 + j + direction) % 4] + i * (3 - (j % 2) * 2)];
 			break;
 		case L:
-			if (direction == 1) {
-				for (i = 0; i < N; i++) {
-					cube[U][i * 3] = prev[B][2 + i * 3];
-					cube[F][i * 3] = prev[U][i * 3];
-					cube[D][i * 3] = prev[F][i * 3];
-					cube[B][2 + i * 3] = prev[D][i * 3];
-				}
-			} else if (direction == -1) {
-				for (i = 0; i < N; i++) {
-					cube[U][i * 3] = prev[F][i * 3];
-					cube[F][i * 3] = prev[D][i * 3];
-					cube[D][i * 3] = prev[B][2 + i * 3];
-					cube[B][2 + i * 3] = prev[U][i * 3];
-				}
-			}
+			int[] e = { 0, 0, 0, 2 };
+			for (i = 0; i < N; i++)
+				for (j = 0; j < 4; j++)
+					cube[adjacentFaces[face][j]][e[j] + i * 3] = prev[adjacentFaces[face][(2 + j + direction) % 4]][e[(2 + j + direction) % 4] + i * 3];
 			break;
 		case R:
-			if (direction == 1) {
-				for (i = 0; i < N; i++) {
-					cube[U][2 + i * 3] = prev[F][2 + i * 3];
-					cube[F][2 + i * 3] = prev[D][2 + i * 3];
-					cube[D][2 + i * 3] = prev[B][i * 3];
-					cube[B][i * 3] = prev[U][2 + i * 3];
-				}
-			} else if (direction == -1) {
-				for (i = 0; i < N; i++) {
-					cube[U][2 + i * 3] = prev[B][i * 3];
-					cube[F][2 + i * 3] = prev[U][2 + i * 3];
-					cube[D][2 + i * 3] = prev[F][2 + i * 3];
-					cube[B][i * 3] = prev[D][2 + i * 3];
-				}
-			}
+			int[] f = { 2, 2, 2, 0 };
+			for (i = 0; i < N; i++)
+				for (j = 0; j < 4; j++)
+					cube[adjacentFaces[face][j]][f[j] + i * 3] = prev[adjacentFaces[face][(2 + j - direction) % 4]][f[(2 + j - direction) % 4] + i * 3];
 			break;
 		default:
 			break;
@@ -216,8 +165,7 @@ public class Main extends Canvas implements KeyListener {
 		int xo = 0, yo = 0;
 
 		g.setColor(Color.GRAY);
-		g.fillRect(x + xo + p[selectedFace][0] * (n * s + padding * (n + 1)), y + yo + p[selectedFace][1] * (n * s + padding * (n + 1)),
-				n * s + padding * (n + 1), n * s + padding * (n + 1));
+		g.fillRect(x + xo + p[selectedFace][0] * (n * s + padding * (n + 1)), y + yo + p[selectedFace][1] * (n * s + padding * (n + 1)), n * s + padding * (n + 1), n * s + padding * (n + 1));
 
 		xo += n * s + padding * (n + 1);
 
