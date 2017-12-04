@@ -16,7 +16,8 @@ public class Main extends Canvas implements KeyListener {
 
 	private static final int WINDOW_WIDTH = 400;
 	private static final int WINDOW_HEIGHT = 400;
-	private static final String WINDOW_TITLE = "Rubik's Cube Simulator v2";
+	private static final String WINDOW_TITLE = "Rubik's Cube Simulator v3";
+	private static final int N = 3;
 
 	// face id's
 	/** facelet value = 10 **/
@@ -77,26 +78,66 @@ public class Main extends Canvas implements KeyListener {
 	// TODO: 3D!?
 	// TODO: add solving capability and output solution
 
-	private void twist(int face, int direction) {
+	private void a(int[][] src, int face, int direction) {
+		int i;
+		int[] c = { 0, 2, 8, 6 };
+		int[] e = { 1, 5, 7, 3 };
+
+		if (direction == 1) {
+			// rotate corners
+			for (i = 0; i < c.length; i++)
+				cube[face][c[i]] = src[face][c[(i + c.length - 1) % c.length]];
+
+			// rotate edges
+			for (i = 0; i < e.length; i++)
+				cube[face][e[i]] = src[face][e[(i + e.length - 1) % e.length]];
+		} else if (direction == -1) {
+			// rotate corners
+			for (i = 0; i < c.length; i++)
+				cube[face][c[i]] = src[face][c[(i + 1) % c.length]];
+
+			// rotate edges
+			for (i = 0; i < e.length; i++)
+				cube[face][e[i]] = src[face][e[(i + 1) % e.length]];
+		}
+	}
+
+	/**
+	 * Returns true if twist has occurred, false if error. Rotate clockwise if direction == 1 else counterclockwise if direction == -1
+	 **/
+	private boolean twist(int face, int direction) {
+		if (Math.abs(direction) != 1) {
+			System.err.println("Direction can only be 1 or -1");
+			return false;
+		}
+		if (face < 0 || face >= 6) {
+			System.err.println("Face exists 0-5 inclusively");
+			return false;
+		}
+
 		int[][] prev = cloneArray(cube);
 
 		int i;
 
+		a(prev, face, direction);
+
 		switch (face) {
 		case U:
 			if (direction == 1) {
+				// rotate outer facelets
+				for (i = 0; i < N; i++) {
+					cube[F][i] = prev[R][i];
+					cube[R][i] = prev[B][i];
+					cube[B][i] = prev[L][i];
+					cube[L][i] = prev[F][i];
+				}
+			} else if (direction == -1) {
+				// rotate outer facelets
 				for (i = 0; i < 3; i++) {
 					cube[F][i] = prev[L][i];
 					cube[R][i] = prev[F][i];
 					cube[B][i] = prev[R][i];
 					cube[L][i] = prev[B][i];
-				}
-			} else if (direction == -1) {
-				for (i = 0; i < 3; i++) {
-					cube[F][i] = prev[R][i];
-					cube[R][i] = prev[B][i];
-					cube[B][i] = prev[L][i];
-					cube[L][i] = prev[F][i];
 				}
 			}
 			break;
@@ -171,17 +212,17 @@ public class Main extends Canvas implements KeyListener {
 		case R:
 			if (direction == 1) {
 				for (i = 0; i < 3; i++) {
-					cube[U][2 + i * 3] = prev[B][i * 3];
-					cube[F][2 + i * 3] = prev[U][2 + i * 3];
-					cube[D][2 + i * 3] = prev[F][2 + i * 3];
-					cube[B][i * 3] = prev[D][2 + i * 3];
-				}
-			} else if (direction == -1) {
-				for (i = 0; i < 3; i++) {
 					cube[U][2 + i * 3] = prev[F][2 + i * 3];
 					cube[F][2 + i * 3] = prev[D][2 + i * 3];
 					cube[D][2 + i * 3] = prev[B][i * 3];
 					cube[B][i * 3] = prev[U][2 + i * 3];
+				}
+			} else if (direction == -1) {
+				for (i = 0; i < 3; i++) {
+					cube[U][2 + i * 3] = prev[B][i * 3];
+					cube[F][2 + i * 3] = prev[U][2 + i * 3];
+					cube[D][2 + i * 3] = prev[F][2 + i * 3];
+					cube[B][i * 3] = prev[D][2 + i * 3];
 				}
 			}
 			break;
@@ -189,11 +230,11 @@ public class Main extends Canvas implements KeyListener {
 			break;
 		}
 
+		return true;
 	}
 
 	Color[] c = { Color.YELLOW, Color.WHITE, Color.GREEN, Color.BLUE, Color.RED, new Color(255, 127, 0) };
 	int[][] p = { { 1, 0 }, { 1, 2 }, { 1, 1 }, { 1, 3 }, { 0, 1 }, { 2, 1 } };
-	Color selected = new Color(40, 40, 40);
 
 	public void paint(Graphics g) {
 		int xx = (getWidth() - WINDOW_WIDTH) / 2;
@@ -201,14 +242,12 @@ public class Main extends Canvas implements KeyListener {
 		g.setColor(Color.BLACK);
 		g.fillRect(xx, yy, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-		// TODO display text or colors
-
 		int i, j, k, n = 3, s = 20, padding = 5;
 		int w = (n * s + padding * (n + 1)) * 3, h = (n * s + padding * (n + 1)) * 4;
 		int x = (xx + WINDOW_WIDTH - w) / 2, y = (yy + WINDOW_HEIGHT - h) / 2;
 		int xo = 0, yo = 0;
 
-		g.setColor(selected);
+		g.setColor(Color.GRAY);
 		g.fillRect(x + xo + p[selectedFace][0] * (n * s + padding * (n + 1)), y + yo + p[selectedFace][1] * (n * s + padding * (n + 1)),
 				n * s + padding * (n + 1), n * s + padding * (n + 1));
 
@@ -351,15 +390,15 @@ public class Main extends Canvas implements KeyListener {
 		frame.setAlwaysOnTop(true);
 
 		main.resetCube();
-		main.scrambleCube(0);
+		// main.scrambleCube(0);
 		main.printCube();
 	}
 
 	private int selectedFace = U;
 
 	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() >= 48 && e.getKeyCode() < 54) {
-			selectedFace = e.getKeyCode() - 48;
+		if (e.getKeyCode() > 48 && e.getKeyCode() <= 54) {
+			selectedFace = e.getKeyCode() - 48 - 1;
 			System.out.println("Selected face: " + selectedFace);
 		} else if (Math.abs(e.getKeyCode() - 38) == 1) twist(selectedFace, e.getKeyCode() - 38);
 		printCube();
