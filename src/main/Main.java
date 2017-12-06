@@ -7,38 +7,17 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Random;
 
 import javax.swing.JFrame;
 
 public class Main extends Canvas implements KeyListener {
 	private static final long serialVersionUID = 1L;
 
-	private static final int WINDOW_WIDTH = 400;
-	private static final int WINDOW_HEIGHT = 400;
-	private static final String WINDOW_TITLE = "Rubik's Cube Simulator v3";
-	private static final int N = 3;
+	public static final int WINDOW_WIDTH = 400;
+	public static final int WINDOW_HEIGHT = 400;
+	public static final String WINDOW_TITLE = "Rubik's Cube Simulator v3";
 
-	// face id's
-	private static final int U = 0;
-	private static final int D = 1;
-	private static final int F = 2;
-	private static final int B = 3;
-	private static final int L = 4;
-	private static final int R = 5;
-
-	// cube facelets
-	private static final int[][] cube = new int[6][9];
-
-	// faces adjacent to each face
-	private static final int[][] adjacentFaces = { //
-			{ F, R, B, L }, // U: F R B L
-			{ F, R, B, L }, // D: F R B L
-			{ U, R, D, L }, // F: U R D L
-			{ U, L, D, R }, // B: U L D R
-			{ U, F, D, B }, // L: U F D B
-			{ U, F, D, B }, // R: U F D B
-	};
+	private final Cube cube = new Cube(3);
 
 	// TODO: DOCUMENT EVERYTHING!!!!!
 	// TODO: add cube rotations
@@ -57,234 +36,17 @@ public class Main extends Canvas implements KeyListener {
 		addKeyListener(this);
 	}
 
-	private void resetCube() {
-		for (int i = 0; i < 6; i++)
-			for (int j = 0; j < 9; j++)
-				cube[i][j] = i;
-	}
-
-	private void scrambleCube(long seed) {
-		Random r = new Random(seed);
-		int l = 15 + r.nextInt(16);
-		for (int i = 0; i < l; i++)
-			twist(r.nextInt(6), 1 - r.nextInt(2) * 2);
-	}
-
-	public static int[][] cloneArray(int[][] src) {
-		int length = src.length;
-		int[][] target = new int[length][src[0].length];
-		for (int i = 0; i < length; i++)
-			System.arraycopy(src[i], 0, target[i], 0, src[i].length);
-		return target;
-	}
-
-	private void a(int[][] src, int face, int direction) {
-		int i, j;
-		int[][] a = { { 0, 2, 8, 6 }, { 1, 5, 7, 3 } }; // corners, edges
-
-		for (j = 0; j < 2; j++)
-			for (i = 0; i < 4; i++)
-				cube[face][a[j][i]] = src[face][a[j][(2 + i + direction) % 4]];
-	}
-
-	/**
-	 * Returns true if twist has occurred, false if error. Rotate clockwise if direction == 1 else counterclockwise if direction == -1
-	 **/
-	private boolean twist(int face, int direction) {
-		if (Math.abs(direction) != 1) {
-			System.err.println("Direction can only be 1 or -1");
-			return false;
-		}
-		if (face < 0 || face >= 6) {
-			System.err.println("Face exists 0-5 inclusively");
-			return false;
-		}
-
-		int[][] prev = cloneArray(cube);
-
-		int i, j;
-
-		a(prev, face, direction);
-
-		switch (face) {
-		case U:
-			int[] a = { 0, 0, 0, 0 };
-			for (i = 0; i < N; i++)
-				for (j = 0; j < 4; j++)
-					cube[adjacentFaces[face][j]][a[j] + i * 1] = prev[adjacentFaces[face][(2 + j - direction) % 4]][a[j] + i * 1];
-			break;
-		case D:
-			int[] b = { 6, 6, 6, 6 };
-			for (i = 0; i < N; i++)
-				for (j = 0; j < 4; j++)
-					cube[adjacentFaces[face][j]][b[j] + i * 1] = prev[adjacentFaces[face][(2 + j + direction) % 4]][b[j] + i * 1];
-			break;
-		case F:
-			int[] c = { 6, 0, 0, 2 };
-			for (i = 0; i < N; i++)
-				for (j = 0; j < 4; j++)
-					cube[adjacentFaces[face][j]][c[j] + i * (1 + (j % 2) * 2)] = prev[adjacentFaces[face][(2 + j + direction) % 4]][c[(2 + j + direction) % 4] + i * (3 - (j % 2) * 2)];
-			break;
-		case B:
-			int[] d = { 0, 0, 6, 2 };
-			for (i = 0; i < N; i++)
-				for (j = 0; j < 4; j++)
-					cube[adjacentFaces[face][j]][d[j] + i * (1 + (j % 2) * 2)] = prev[adjacentFaces[face][(2 + j + direction) % 4]][d[(2 + j + direction) % 4] + i * (3 - (j % 2) * 2)];
-			break;
-		case L:
-			int[] e = { 0, 0, 0, 2 };
-			for (i = 0; i < N; i++)
-				for (j = 0; j < 4; j++)
-					cube[adjacentFaces[face][j]][e[j] + i * 3] = prev[adjacentFaces[face][(2 + j + direction) % 4]][e[(2 + j + direction) % 4] + i * 3];
-			break;
-		case R:
-			int[] f = { 2, 2, 2, 0 };
-			for (i = 0; i < N; i++)
-				for (j = 0; j < 4; j++)
-					cube[adjacentFaces[face][j]][f[j] + i * 3] = prev[adjacentFaces[face][(2 + j - direction) % 4]][f[(2 + j - direction) % 4] + i * 3];
-			break;
-		default:
-			break;
-		}
-
-		return true;
-	}
-
-	Color[] c = { Color.YELLOW, Color.WHITE, Color.GREEN, Color.BLUE, Color.RED, new Color(255, 127, 0) };
-	int[][] p = { { 1, 0 }, { 1, 2 }, { 1, 1 }, { 1, 3 }, { 0, 1 }, { 2, 1 } };
-
 	public void paint(Graphics g) {
 		int xx = (getWidth() - WINDOW_WIDTH) / 2;
 		int yy = (getHeight() - WINDOW_HEIGHT) / 2;
 		g.setColor(Color.BLACK);
 		g.fillRect(xx, yy, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-		int i, j, k, n = 3, s = 20, padding = 5;
-		int w = (n * s + padding * (n + 1)) * 3, h = (n * s + padding * (n + 1)) * 4;
-		int x = (xx + WINDOW_WIDTH - w) / 2, y = (yy + WINDOW_HEIGHT - h) / 2;
-		int xo = 0, yo = 0;
-
-		g.setColor(Color.GRAY);
-		g.fillRect(x + xo + p[selectedFace][0] * (n * s + padding * (n + 1)), y + yo + p[selectedFace][1] * (n * s + padding * (n + 1)), n * s + padding * (n + 1), n * s + padding * (n + 1));
-
-		xo += n * s + padding * (n + 1);
-
-		// draw U, D face
-		for (k = 0; k < 2; k++, yo += (n * s + padding * (n + 1)) * 2) {
-			for (j = 0; j < n; j++) { // vertical
-				for (i = 0; i < n; i++) { // horizontal
-					g.setColor(c[cube[k][i + j * n]]);
-					g.fillRect(x + xo + (s + padding) * i + padding, y + yo + (s + padding) * j + padding, s, s);
-				}
-			}
-		}
-
-		xo -= n * s + padding * (n + 1);
-		yo -= (n * s + padding * (n + 1)) * 3;
-
-		// draw L, F, R faces
-		int[] a = { L, F, R };
-		for (k = 0; k < 3; k++) {
-			for (j = 0; j < n; j++) { // vertical
-				for (i = 0; i < n; i++) { // horizontal
-					g.setColor(c[cube[a[k]][i + j * n]]);
-					g.fillRect(x + xo + (s + padding) * i + padding, y + yo + (s + padding) * j + padding, s, s);
-				}
-			}
-			xo += n * s + padding * (n + 1);
-		}
-
-		xo -= (n * s + padding * (n + 1)) * 1;
-		yo += (n * s + padding * (n + 1)) * 3;
-
-		// draw B face
-		for (j = n - 1; j >= 0; j--) { // vertical
-			for (i = n - 1; i >= 0; i--) { // horizontal
-				g.setColor(c[cube[B][i + j * n]]);
-				g.fillRect(x + xo - ((s + padding) * i + padding) - s, y + yo - ((s + padding) * j + padding) - s, s, s);
-			}
-		}
+		cube.paint(g);
 	}
 
 	public void update(Graphics g) {
 		paint(g);
-	}
-
-	private void printCube() {
-		int i, j, k;
-
-		System.out.println();
-
-		// show U face
-		for (i = 0; i < 3; i++) {
-			for (j = 0; j < 3; j++) {
-				if (j == 1) {
-					for (k = 0; k < 3; k++) {
-						System.out.print(" " + cube[U][k + i * 3] + " ");
-					}
-				} else {
-					for (k = 0; k < 3; k++) {
-						System.out.print(" " + " " + " ");
-					}
-				}
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-
-		System.out.println();
-
-		// show L, F, R faces
-		int[] a = { L, F, R };
-		for (i = 0; i < 3; i++) {
-			for (j = 0; j < 3; j++) {
-				for (k = 0; k < 3; k++) {
-					System.out.print(" " + cube[a[j]][k + i * 3] + " ");
-				}
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-
-		System.out.println();
-
-		// show D face
-		for (i = 0; i < 3; i++) {
-			for (j = 0; j < 3; j++) {
-				if (j == 1) {
-					for (k = 0; k < 3; k++) {
-						System.out.print(" " + cube[D][k + i * 3] + " ");
-					}
-				} else {
-					for (k = 0; k < 3; k++) {
-						System.out.print(" " + " " + " ");
-					}
-				}
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-
-		System.out.println();
-
-		// show B face
-		for (i = 2; i >= 0; i--) {
-			for (j = 0; j < 3; j++) {
-				if (j == 1) {
-					for (k = 2; k >= 0; k--) {
-						System.out.print(" " + cube[B][k + i * 3] + " ");
-					}
-				} else {
-					for (k = 2; k >= 0; k--) {
-						System.out.print(" " + " " + " ");
-					}
-				}
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-
-		System.out.println();
 	}
 
 	public static void main(String[] args) {
@@ -304,20 +66,11 @@ public class Main extends Canvas implements KeyListener {
 		frame.setVisible(true);
 
 		frame.setAlwaysOnTop(true);
-
-		main.resetCube();
-		// main.scrambleCube(0);
-		// main.printCube();
 	}
 
-	private int selectedFace = U;
-
 	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() > 48 && e.getKeyCode() <= 54) {
-			selectedFace = e.getKeyCode() - 48 - 1;
-			System.out.println("Selected face: " + selectedFace);
-		} else if (Math.abs(e.getKeyCode() - 38) == 1) twist(selectedFace, e.getKeyCode() - 38);
-		// printCube();
+		if (e.getKeyCode() > 48 && e.getKeyCode() <= 54) cube.selectedFace = e.getKeyCode() - 48 - 1;
+		else if (Math.abs(e.getKeyCode() - 38) == 1) cube.twist(cube.selectedFace, e.getKeyCode() - 38);
 		repaint();
 	}
 
