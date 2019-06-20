@@ -14,6 +14,7 @@ public class Cube {
 	private static final int B = 3;
 	private static final int L = 4;
 	private static final int R = 5;
+	@SuppressWarnings("unused")
 	private static final String[] faceStrings = { "Y", "W", "G", "B", "R", "O" };
 
 	// cube facelets
@@ -44,6 +45,7 @@ public class Cube {
 				cube[i][j] = i;
 	}
 
+	@SuppressWarnings("unused")
 	private void scrambleCube(long seed) {
 		Random r = new Random(seed);
 		int l = 15 + r.nextInt(16);
