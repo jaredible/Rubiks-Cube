@@ -17,6 +17,7 @@ public class Main2 extends Canvas implements KeyListener {
 	public static final int WIDTH = 400;
 	public static final int HEIGHT = 400;
 	public static final String TITLE = "Testing";
+	@SuppressWarnings("unused")
 	private final BufferedImage image;
 
 	private final Cube2 cube = new Cube2(Size.THREE);
@@ -47,11 +48,11 @@ public class Main2 extends Canvas implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		switch (e.getKeyCode()) {
-		case 39:
-			cube.twist(cube.getCurrentFace(), Direction.CW);
-			break;
 		case 37:
 			cube.twist(cube.getCurrentFace(), Direction.CCW);
+			break;
+		case 39:
+			cube.twist(cube.getCurrentFace(), Direction.CW);
 			break;
 		case 49:
 			cube.setCurrentFace(Face.UP);
